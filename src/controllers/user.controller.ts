@@ -1,7 +1,7 @@
 import { Request,Response } from "express";
 import User from "../models/user.model";
 import bcrypt from 'bcryptjs';
-import { decodedRefreshToken, genAccessToken, genRefreshToken, isVerifiedRefreshToken, resolveAccessToken } from "../utils/tokens";
+import { genAccessToken, genRefreshToken} from "../utils/tokens";
 import { AuthRequest } from "../middleware";
 
 //-------------------------------------Sign Up Controller Start ---------------------------------------------------
