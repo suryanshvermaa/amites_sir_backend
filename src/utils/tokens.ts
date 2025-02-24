@@ -49,3 +49,15 @@ export const isVerifiedRefreshToken=(token:string):Promise<boolean>=>{
         }
     })
 }
+
+export const decodedRefreshToken=(token:string):Promise<string>=>{
+    return new Promise(async(resolve,reject)=>{
+        try {
+            const decodedToken=await jwt.verify(token,process.env.JWT_SECRET!);
+            if(!decodedToken) reject('error');
+            resolve(String(decodedToken));
+        } catch (error:any) {
+            reject(false);
+        }
+    })
+}
