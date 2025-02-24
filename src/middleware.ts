@@ -1,18 +1,27 @@
 import { Request,Response,NextFunction } from "express"
-import { isVerifiedRefreshToken } from "./utils/tokens";
+import { decodedRefreshToken,isVerifiedRefreshToken } from "./utils/tokens";
+import { JwtPayload } from "jsonwebtoken";
+export interface AuthRequest extends Request{
+    user?:string|JwtPayload;
+}
 
-export const userAuthMiddleWare=async(req:Request,res:Response,next:NextFunction)=>{
+export const userAuthMiddleWare=async(req:AuthRequest,res:Response,next:NextFunction)=>{
     try {
-        const refreshToken=req.body.accessToken;
-        if(!refreshToken){
+        const refreshToken=req.body.refreshToken;
+        const accessToken=req.body.accessToken;
+        if(!refreshToken||!accessToken){
             res.status(400)
             .json({
                 success:false,
-                message:"refresh token verification failed",
-            })
+                message:"refresh token not found",
+            }) 
         }
         const isVerified=await isVerifiedRefreshToken(refreshToken);
-        if(isVerified) next();
+        if(isVerified){
+            const decodedToken=await decodedRefreshToken(refreshToken);
+            req.user=decodedToken;
+            next();
+        }
         else{
             res.status(400)
             .json({

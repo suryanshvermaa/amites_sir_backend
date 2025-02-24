@@ -1,9 +1,9 @@
-import jwt from "jsonwebtoken";
+import jwt, { JwtPayload } from "jsonwebtoken";
 import User from "../models/user.model";
 export const genAccessToken=(name:string,email:string,id:string)=>{
     return new Promise(async(resolve,reject)=>{
         try {
-            const accessToken=await jwt.sign({name,email,id},process.env.JWT_SECRET!,{expiresIn:'15m'});
+            const accessToken=await jwt.sign({name,email,id},process.env.JWT_SECRET!,{expiresIn:'1h'});
             resolve(accessToken);
         } catch (error:any) {
             reject(error.message)
@@ -14,7 +14,7 @@ export const genAccessToken=(name:string,email:string,id:string)=>{
 export const genRefreshToken=(name:string,email:string)=>{
     return new Promise(async(resolve,reject)=>{
         try {
-            const refreshToken=await jwt.sign({name,email},process.env.JWT_SECRET!,{expiresIn:'2h'});
+            const refreshToken=await jwt.sign({name,email},process.env.JWT_SECRET!,{expiresIn:'12h'});
             resolve(refreshToken);
         } catch (error:any) {
             reject(error.message)
@@ -26,11 +26,12 @@ export const resolveAccessToken=(token:string)=>{
     return new Promise(async(resolve,reject)=>{
         try {
             const decodedToken=await jwt.verify(token,process.env.JWT_SECRET!);
-            if(!decodedToken) reject('access token verification failed');
+            if(!decodedToken) reject('');
             const idOfUser=JSON.parse(JSON.stringify(decodedToken)).id;
             resolve(idOfUser);
         } catch (error:any) {
-            reject(error.message);
+            console.log(error.message);
+            reject('');
         }
     })
 }
@@ -50,14 +51,14 @@ export const isVerifiedRefreshToken=(token:string):Promise<boolean>=>{
     })
 }
 
-export const decodedRefreshToken=(token:string):Promise<string>=>{
+export const decodedRefreshToken=(token:string):Promise<string|JwtPayload>=>{
     return new Promise(async(resolve,reject)=>{
         try {
             const decodedToken=await jwt.verify(token,process.env.JWT_SECRET!);
-            if(!decodedToken) reject('error');
-            resolve(String(decodedToken));
+            if(!decodedToken) reject('');
+            resolve(decodedToken);
         } catch (error:any) {
-            reject(false);
+            reject('');
         }
     })
 }

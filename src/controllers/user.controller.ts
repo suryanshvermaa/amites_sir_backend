@@ -2,6 +2,7 @@ import { Request,Response } from "express";
 import User from "../models/user.model";
 import bcrypt from 'bcryptjs';
 import { decodedRefreshToken, genAccessToken, genRefreshToken, isVerifiedRefreshToken, resolveAccessToken } from "../utils/tokens";
+import { AuthRequest } from "../middleware";
 
 //-------------------------------------Sign Up Controller Start ---------------------------------------------------
 export const signUp=async(req:Request,res:Response)=>{
@@ -69,7 +70,6 @@ export const loginUser=async(req:Request,res:Response)=>{
                 return;
             }
 
-            // const isCorrectPassword=await user.comparePassword(password);
             const isCorrectPassword = await bcrypt.compare(password, user.password);
             if(!isCorrectPassword){
                 res.status(400)
@@ -116,19 +116,9 @@ export const loginUser=async(req:Request,res:Response)=>{
 
 
 //-------------------------------------Delete User Controller Start ---------------------------------------------------
-export const deleteUser=async(req:Request,res:Response)=>{
+export const deleteUser=async(req:AuthRequest,res:Response)=>{
    try {
-    const {refreshToken}=req.body;
-    const isVerified=await isVerifiedRefreshToken(String(refreshToken));
-    if(!isVerified){
-        res.status(400)
-        .json({
-            success:false,
-            error:'error in deleting user'
-        })
-        return;
-    }
-    const decodedToken=await decodedRefreshToken(refreshToken);
+    const decodedToken=req.user;
     const email=JSON.parse(JSON.stringify(decodedToken)).email;
     await User.deleteOne({email});
     res.status(200)
